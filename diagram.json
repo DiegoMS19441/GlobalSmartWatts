@@ -1,0 +1,104 @@
+{
+    "version": 1,
+    "author": "Edson da Rosa Junior",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "wokwi-esp32-devkit-v1",
+            "id": "esp",
+            "top": -23.33,
+            "left": -65.33,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-potentiometer",
+            "id": "pot1",
+            "top": 12.96,
+            "left": 162.2,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-led",
+            "id": "led1",
+            "top": 34.8,
+            "left": -149.8,
+            "attrs": {
+                "color": "red"
+            }
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r1",
+            "top": 112.98,
+            "left": -165.49,
+            "rotate": 90,
+            "attrs": {
+                "value": "370"
+            }
+        }
+    ],
+    "connections": [
+        [
+            "esp:TX0",
+            "$serialMonitor:RX",
+            "",
+            []
+        ],
+        [
+            "esp:RX0",
+            "$serialMonitor:TX",
+            "",
+            []
+        ],
+        [
+            "pot1:GND",
+            "esp:GND.1",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "pot1:SIG",
+            "esp:D4",
+            "gold",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "pot1:VCC",
+            "esp:3V3",
+            "red",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "led1:C",
+            "r1:1",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r1:2",
+            "esp:GND.2",
+            "black",
+            [
+                "h41.21",
+                "v-25.64"
+            ]
+        ],
+        [
+            "led1:A",
+            "esp:D26",
+            "red",
+            [
+                "v0"
+            ]
+        ]
+    ],
+    "dependencies": {}
+}
