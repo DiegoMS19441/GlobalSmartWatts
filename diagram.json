@@ -4,7 +4,7 @@
   "editor": "wokwi",
   "parts": [
     { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": -23.33, "left": -65.33, "attrs": {} },
-    { "type": "wokwi-potentiometer", "id": "pot1", "top": 12.96, "left": 162.2, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 56.3, "left": 124.6, "attrs": {} },
     {
       "type": "wokwi-led",
       "id": "led1",
@@ -15,10 +15,17 @@
     {
       "type": "wokwi-resistor",
       "id": "r1",
-      "top": 112.98,
-      "left": -165.49,
+      "top": 110.4,
+      "left": -163.75,
       "rotate": 90,
       "attrs": { "value": "370" }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -147.2,
+      "left": 130.4,
+      "attrs": { "pins": "i2c" }
     }
   ],
   "connections": [
@@ -28,7 +35,11 @@
     [ "pot1:VCC", "esp:3V3", "red", [ "v0" ] ],
     [ "led1:C", "r1:1", "black", [ "v0" ] ],
     [ "r1:2", "esp:GND.2", "black", [ "h41.21", "v-25.64" ] ],
-    [ "led1:A", "esp:D33", "red", [ "v0" ] ]
+    [ "led1:A", "esp:D33", "red", [ "v0" ] ],
+    [ "lcd1:GND", "esp:GND.1", "black", [ "h-76.8", "v230.4" ] ],
+    [ "lcd1:VCC", "esp:3V3", "red", [ "h-67.2", "v230.5" ] ],
+    [ "lcd1:SDA", "esp:D21", "green", [ "h-57.6", "v144.2" ] ],
+    [ "lcd1:SCL", "esp:D22", "green", [ "h-38.4", "v96.3" ] ]
   ],
   "dependencies": {}
 }
