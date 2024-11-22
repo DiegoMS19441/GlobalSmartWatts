@@ -1,78 +1,73 @@
-// Digite "thinger.io" no Library Manager.
-// Instale a biblioteca thinger.io (by Alvaro Luis Bustamante)
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 #include <ThingerESP32.h>
 
-// Insira as credenciais do dispositivo configurado na plataforma:
-#define USERNAME "xdiegomsx"         // Seu nome de usuário na plataforma thinger.io
-#define DEVICE_ID "SMARTWATTS"       // Device ID criado na plataforma
-#define DEVICE_CREDENTIAL "VAD26193" // Credencial do device criada na plataforma
+#define pinoSensor 36
 
-// Credenciais do gateway público do Wokwi:
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int valorSensor = 0;
+float voltagem, porcentagem;
+float corrente = 0.50; 
+float consumoKWh = 0.0;
+float precoKWh = 0.60; 
+float custoEmReais = 0.0;
+unsigned long tempoAnterior = 0;
+
+#define USERNAME "xdiegomsx"         
+#define DEVICE_ID "SMARTWATTS"       
+#define DEVICE_CREDENTIAL "VAD26193" 
+
 #define SSID "Wokwi-GUEST"
-#define SSID_PASSWORD "" // Nada aqui...
+#define SSID_PASSWORD "" 
 
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 
-// Definição dos pinos
-#define PINO_POTENCIOMETRO 4 // Pino do potenciômetro
-#define PINO_LED 26          // Pino do LED
+void setup() {
+  Serial.begin(9600);
 
-// Variáveis para armazenar valores
-int valorPotenciometro = 0; // Valor da leitura do potenciômetro
-int pwm = 0;                // Valor do PWM para controle do LED
-float valorCorrente = 0;    // Valor da corrente convertida
 
-void setup()
-{
-  Serial.begin(115200);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("SmartWatts");
+  delay(2000); 
+  lcd.clear();
+
   thing.add_wifi(SSID, SSID_PASSWORD);
-  delay(500);
 
-  // Configuração do LED como saída
-  pinMode(PINO_LED, OUTPUT);
 
-  // Adicionando o recurso "Sensor" à plataforma Thinger.io para enviar o valor da corrente
-  thing["SensorCorrente"] >> outputValue(valorCorrente); // Usando o operador ">>" para enviar o valor
+  thing["Custo em Reais"] >> outputValue(custoEmReais); 
 }
 
-void leituraSensor()
-{
-  // Leitura do valor do potenciômetro (0 a 4095)
-  valorPotenciometro = analogRead(PINO_POTENCIOMETRO);
+void loop() {
+  valorSensor = analogRead(pinoSensor);
+  voltagem = valorSensor * (3.3 / 4095);
+  porcentagem = (valorSensor * 100) / 4095;
 
-  // Função map() para converter a leitura do potenciômetro em um valor de PWM (0 a 255)
-  pwm = map(valorPotenciometro, 0, 1023, 0, 255);
+  unsigned long tempoAtual = millis();
+  float tempoHoras = (tempoAtual - tempoAnterior) / 3600000.0;
+  tempoAnterior = tempoAtual;
 
-  // Exemplo de conversão de um valor de 0 a 4095 para um intervalo de 2 a 20 amperes
-  valorCorrente = map(valorPotenciometro, 0, 4095, 2, 20);
+  float potencia = voltagem * corrente;
+  consumoKWh += (potencia * tempoHoras);
 
-  // Envia a leitura de corrente para a plataforma Thingera
-  Serial.print("Corrente elétrica: ");
-  Serial.println(valorCorrente);
+  float custoEmReais = consumoKWh * precoKWh;
 
-  // Aciona o LED proporcionalmente à leitura do potenciômetro (PWM)
-  analogWrite(PINO_LED, pwm); // Ajusta a intensidade do LED conforme a leitura do potenciômetro
+  Serial.print("Consumo Acumulado: ");
+  Serial.print(consumoKWh, 6);
+  Serial.print(" kWh | Custo Total: R$ ");
+  Serial.println(custoEmReais, 2);
 
-  // Se a corrente for maior que 20 amperes, pisque o LED
-  if (valorCorrente > 18)
-  {
-    digitalWrite(PINO_LED, HIGH); // Acende o LED
-    delay(500);                   // Espera meio segundo
-    digitalWrite(PINO_LED, LOW);  // Apaga o LED
-    delay(500);                   // Espera meio segundo
-  }
+  lcd.setCursor(0, 0); 
+  lcd.print("Consumo:");
+  lcd.print(consumoKWh, 2);
+  lcd.print(" kWh");
 
-  delay(200); // Intervalo de 200 milissegundos entre as leituras
-}
+  lcd.setCursor(0, 1); 
+  lcd.print("Custo: R$");
+  lcd.print(custoEmReais, 4);
 
-void loop()
-{
-  // Chamada da função para leitura do sensor e controle do LED
-  leituraSensor();
-
-  // Comunicação com a plataforma Thinger.io
   thing.handle();
 
-  // A requisição ocorrerá a cada 10 segundos.
-  delay(10);
+  delay(2000);
 }
